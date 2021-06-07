@@ -1,31 +1,31 @@
-/*´´½¨Èı¸ö±í*/
-CREATE TABLE Reader /*¶ÁÕß*/
+/*åˆ›å»ºä¸‰ä¸ªè¡¨*/
+CREATE TABLE Reader /*è¯»è€…*/
 (
 	Sno int PRIMARY KEY,
 	Sname CHAR(40) NOT NULL,
 );
 
-CREATE TABLE Book  /*Êé¼®*/
+CREATE TABLE Book  /*ä¹¦ç±*/
 (
 	Bno int PRIMARY KEY,
 	Bname CHAR(20) NOT NULL,
-	Bstate CHAR(20) CHECK(Bstate IN('ÔÚ¼Ü','½è³ö'))  /*×´Ì¬*/
+	Bstate CHAR(20) CHECK(Bstate IN('åœ¨æ¶','å€Ÿå‡º'))  /*çŠ¶æ€*/
 );
 
-CREATE TABLE Borrow  /*½èÔÄ*/
+CREATE TABLE Borrow  /*å€Ÿé˜…*/
 (
-	Bno int NOT NULL primary key identity(1,1),/*ÊéºÅ*/
-	Sno int NOT NULL,/*½èÊéÖ¤ºÅ*/
+	Bno int NOT NULL identity(1,1),/*ä¹¦å·*/
+	Sno int NOT NULL,/*å€Ÿä¹¦è¯å·*/
 	Bname CHAR(20) NOT NULL,
 	Sname CHAR(40) NOT NULL,
 	BoTime DATE NOT NULL,
-	ReTime DATE NOT NULL,/*»¹ÊéÊ±¼äÒ»¸öÔÂÒÔºó*/
+	ReTime DATE NOT NULL,/*è¿˜ä¹¦æ—¶é—´ä¸€ä¸ªæœˆä»¥å*/
 	FOREIGN KEY(Sno)REFERENCES Reader(Sno),
 	FOREIGN KEY(Bno)REFERENCES Book(Bno)
 );
 
 
-/*´æ´¢¹ı³Ìsf_borrow,ÊéºÅ¡¢½èÊéÖ¤ºÅ£¬½èÊéÊ±¼ä×÷Îª²ÎÊı£¬¹é»¹ÈÕÆÚÒ»¸öÔÂºó*/
+/*å­˜å‚¨è¿‡ç¨‹sf_borrow,ä¹¦å·ã€å€Ÿä¹¦è¯å·ï¼Œå€Ÿä¹¦æ—¶é—´ä½œä¸ºå‚æ•°ï¼Œå½’è¿˜æ—¥æœŸä¸€ä¸ªæœˆå*/
 Go
 CREATE PROCEDURE sf_borrow(@Bno int,@Sno int,@BoTime date)
 AS
@@ -36,12 +36,12 @@ BEGIN
 END;
 
 
-/*insert  ´¥·¢Æ÷*/
+/*insert  è§¦å‘å™¨*/
 GO
 CREATE TRIGGER Tri_Insert
 ON Borrow FOR INSERT AS 
 BEGIN
-/*´ÓinsertµÄ±íÖĞÊÕ¼¯ĞÅÏ¢*/
+/*ä»insertçš„è¡¨ä¸­æ”¶é›†ä¿¡æ¯*/
 declare @Bno char(9) set @Bno =(select Bno from inserted)
 declare @Sno char(9) set @Sno =(select Sno from inserted)
 declare @BoTime char(9) set @BoTime =(select BoTime from inserted)
@@ -52,24 +52,24 @@ print(@Sno)
 print(@BoTime)
 print(@Bname)
 print(@Sname)
-	/*ÊéÒÑ±»½è×ß£¬²»¿É½èÔÄ*/
-	IF((select Bstate from BOOK where Bno =@Bno)='½è³ö' )
+	/*ä¹¦å·²è¢«å€Ÿèµ°ï¼Œä¸å¯å€Ÿé˜…*/
+	IF((select Bstate from BOOK where Bno =@Bno)='å€Ÿå‡º' )
 		BEGIN
 			rollback
-			print '´ËÊéÒÑ±»½è×ß£¬²»¿É½èÔÄ'
+			print 'æ­¤ä¹¦å·²è¢«å€Ÿèµ°ï¼Œä¸å¯å€Ÿé˜…'
 		END
-	IF((select Bstate from BOOK where Bno =@Bno)='ÔÚ¼Ü' )
+	IF((select Bstate from BOOK where Bno =@Bno)='åœ¨æ¶' )
 		BEGIN
-			print '½èÊé³É¹¦'
-				/*¸ü¸ÄBOOK±íÖĞµÄBstate*/
+			print 'å€Ÿä¹¦æˆåŠŸ'
+				/*æ›´æ”¹BOOKè¡¨ä¸­çš„Bstate*/
 			UPDATE BOOK
-			SET  Bstate='½è³ö'
+			SET  Bstate='å€Ÿå‡º'
 			WHERE  Bno =@Bno
 		END
 END
 
 GO
-/*´æ´¢¹ı³Ì»¹Êésf_return,¸ù¾İÊéºÅÉ¾³ıÊé¼®ĞÅÏ¢*/
+/*å­˜å‚¨è¿‡ç¨‹è¿˜ä¹¦sf_return,æ ¹æ®ä¹¦å·åˆ é™¤ä¹¦ç±ä¿¡æ¯*/
 CREATE PROCEDURE sf_return  
 @BNo char(20) AS
 BEGIN
@@ -77,12 +77,12 @@ BEGIN
 	WHERE Bno = @Bno
 	END
 	
-/*É¾³ı²Ù×÷´¥·¢Æ÷£¬½èÔÄĞÅÏ¢±í½øĞĞÉ¾³ı²Ù×÷Ê±£¬¸ù¾İÊéºÅ£¬¸Ä±ä¡°×´Ì¬¡±×Ö¶Î·¢Éú±ä»¯*/
+/*åˆ é™¤æ“ä½œè§¦å‘å™¨ï¼Œå€Ÿé˜…ä¿¡æ¯è¡¨è¿›è¡Œåˆ é™¤æ“ä½œæ—¶ï¼Œæ ¹æ®ä¹¦å·ï¼Œæ”¹å˜â€œçŠ¶æ€â€å­—æ®µå‘ç”Ÿå˜åŒ–*/
 GO
 CREATE TRIGGER Tri_Delete ON Borrow FOR DELETE AS
 BEGIN 
 declare @Bno char(10) set @Bno =(select Bno from deleted)
 	BEGIN 
-		UPDATE BOOK SET Bstate ='ÔÚ¼Ü' WHERE Bno=@Bno
+		UPDATE BOOK SET Bstate ='åœ¨æ¶' WHERE Bno=@Bno
 	END	
 END
